@@ -32,11 +32,20 @@ function highlight (row) {
     var width = edoc.lines[row].length * cellWidth;
     fillRect(0, y, width, 20, "red")
 }
+function highlightStartEnd(row,start,end){
+    var y = row * 20;
+    var x = start*cellWidth;
+    var width = (end-start)* cellWidth;
+    fillRect(x, y, width, 20, "red")
+}
 function renderSelection () {
     var start = edoc.select.start;
     var end = edoc.select.end;
     if (start.lno == end.lno) {
-        highlight2(start.lno, start.col);
+        var endC = Math.max(start.col,end.col);
+        var startC = Math.min(start.col, end.col);
+        console.log(startC,endC);
+        highlightStartEnd(start.lno, startC, endC)
     } else {
         var s1 = start.lno < end.lno ? start : end;
         var s2 = start.lno < end.lno ? end : start;
@@ -326,7 +335,6 @@ class TextEditDocument {
             result.push(endLine);
             this.clipboard =result.map(l=>l.join("")).join("\n");
         }
-        console.log("cut clipbaord",this.clipboard);
     }
 
     copySelection () {
@@ -374,14 +382,12 @@ var edoc = new TextEditDocument();
 var keyPressed = new Array();
 var cursorLastRendered = Date.now();
 var showCursor = false;
-var cursorX = 0;
-var cursorY = 0;
+
 
 document.addEventListener("keydown", function (e) {
     var shiftOn = e.shiftKey;
     var ctrlOn = e.ctrlKey;
     if (e.key == "Backspace") {
-        cursorX--;
         edoc.backspace();
     } else if (e.key == "ArrowLeft") {
         edoc.moveLeft(shiftOn);
@@ -400,11 +406,8 @@ document.addEventListener("keydown", function (e) {
     } else if ((e.key == "c" || e.key === 'C') && ctrlOn) {
         edoc.copySelection();
     } else if (e.key == "Enter") {
-        cursorY++;
-        cursorX = 0;
         edoc.newLine();
     } else {
-        cursorX++;
         if (e.key.length == 1)
             edoc.putChar(e.key);
     }
