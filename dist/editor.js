@@ -52,7 +52,7 @@ export class EditDoc {
         return this.lno == 0 && this.col == 0;
     }
     reachedEndOfLine() {
-        return this.col == this.lines[this.lno].length;
+        return this.col == this.lines[this.lno].length + 1;
     }
     reachedStartOfLine() {
         return this.col == 0;
@@ -158,9 +158,10 @@ export class EditDoc {
             this.col = this.lines[this.lno].length;
             this.lines[this.lno] = this.lines[this.lno].concat(oldLineText);
             this.lines.splice(oldLine, 1);
+            this.col++;
             return;
         }
-        this.lines[this.lno].splice(this.col - 1, 1);
+        this.lines[this.lno].splice(this.col + 1, 1);
         this.col--;
     }
     deleteChar() {
@@ -187,32 +188,16 @@ export class EditDoc {
         }
         return result;
     }
-    getSelectedData() {
-        var start = this.select.start;
-        var end = this.select.end;
-        if (start.lno == end.lno) {
-            return [this.copyArray(this.lines[start.lno], 0, start.col)];
-        }
-        else {
-            var result = [];
-            var s1 = start.lno < end.lno ? start : end;
-            var s2 = start.lno < end.lno ? end : start;
-            var l = this.lines[s1.lno];
-            result.push(this.copyArray(l, s1.col, l.length - 1));
-            for (var i = s1.lno + 1; i <= s2.lno - 1; i++) {
-                var l = this.lines[i];
-                result.push(this.copyArray(l, 0, l.length - 1));
-            }
-            result.push(this.copyArray(l, 0, s2.col));
-            return result;
-        }
-    }
     cutSelection() {
         if (!this.selectionOn)
             return;
         this.selectionOn = false;
         var start = this.select.start;
         var end = this.select.end;
+        if (end.col == 0) {
+            end.lno--;
+            end.lno = Math.max(end.lno, 0);
+        }
         if (start.lno == end.lno) {
             var l = this.lines[start.lno];
             var minCol = Math.min(start.col, end.col);
@@ -247,6 +232,10 @@ export class EditDoc {
         this.selectionOn = false;
         var start = this.select.start;
         var end = this.select.end;
+        if (end.col == 0) {
+            end.lno--;
+            end.lno = Math.max(end.lno, 0);
+        }
         if (start.lno == end.lno) {
             var l = this.lines[start.lno];
             var deletedElements = l.slice(start.col, l.length);

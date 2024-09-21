@@ -1,3 +1,4 @@
+import { Editor_BG, Editor_Current_Line_BG, Editor_Gutter, Editor_Gutter_Text, Editor_Selection_Color, Editor_Text, } from "./colors.js";
 export class TextRender {
     getWidth() {
         return this.canvas.width;
@@ -11,13 +12,14 @@ export class TextRender {
         this.linesToRender = 0;
         this.gutterWidth = 0;
         this.canvas = canvas;
-        this.g2 = canvas.getContext("2d");
+        this.g2 = canvas.getContext("2d", { alpha: false });
         canvas.width = width;
         canvas.height = height;
         this.cellHeight = 16;
         if (this.g2) {
-            this.g2.font = this.cellHeight + 'px "Fira Code", monospace';
+            this.g2.font = this.cellHeight + "px fira, monospace";
             this.g2.textBaseline = "top";
+            this.g2.textRendering = "geometricPrecision";
             this.cellWidth = this.g2.measureText("Z").width;
         }
     }
@@ -43,7 +45,7 @@ export class TextRender {
             var x = startCol * this.cellWidth;
             var width = this.edoc.lines[row].length - startCol;
             width *= this.cellWidth;
-            this.fillRect(x, y, width, this.cellHeight, "red");
+            this.fillRect(x, y, width, this.cellHeight, Editor_Selection_Color);
         }
     }
     highlight2(row, endCol) {
@@ -51,14 +53,14 @@ export class TextRender {
         var y = row * this.cellHeight;
         var width = endCol * this.cellWidth;
         var x = endCol * this.cellWidth;
-        this.fillRect(0, y, width, this.cellHeight, "red");
+        this.fillRect(0, y, width, this.cellHeight, Editor_Selection_Color);
     }
     highlight(row) {
         if (this.edoc) {
             row = row - this.scrollY;
             var y = row * this.cellHeight;
             var width = this.edoc.lines[row].length * this.cellWidth;
-            this.fillRect(0, y, width, this.cellHeight, "red");
+            this.fillRect(0, y, width, this.cellHeight, Editor_Selection_Color);
         }
     }
     highlightStartEnd(row, start, end) {
@@ -66,7 +68,7 @@ export class TextRender {
         var y = row * this.cellHeight;
         var x = start * this.cellWidth;
         var width = (end - start) * this.cellWidth;
-        this.fillRect(x, y, width, this.cellHeight, "red");
+        this.fillRect(x, y, width, this.cellHeight, Editor_Selection_Color);
     }
     renderSelection() {
         if (this.edoc) {
@@ -94,7 +96,7 @@ export class TextRender {
             var screenX = 0;
             for (var i = this.scrollY; i < this.linesToRender; i++) {
                 var text = this.edoc.lines[i].join("");
-                this.drawText(0, screenX * this.cellHeight, text, "white");
+                this.drawText(0, screenX * this.cellHeight, text, Editor_Text);
                 screenX++;
             }
         }
@@ -117,6 +119,16 @@ export class TextRender {
             if (this.linesToRender > this.edoc.lines.length) {
                 this.linesToRender = this.edoc.lines.length;
             }
+            this.updateEText("start.lno", this.edoc.select.start.lno + "");
+            this.updateEText("start.col", this.edoc.select.start.col + "");
+            this.updateEText("end.lno", this.edoc.select.end.lno + "");
+            this.updateEText("end.col", this.edoc.select.end.col + "");
+        }
+    }
+    updateEText(id, text) {
+        var e = document.getElementById(id);
+        if (e) {
+            e.innerHTML = text;
         }
     }
     renderCursor() {
@@ -134,17 +146,19 @@ export class TextRender {
     }
     renderGutter() {
         var noOfScreenRows = this.getHeight() / this.cellHeight;
-        this.fillRect(0, 0, this.gutterWidth, this.getHeight(), "#222");
+        this.fillRect(0, 0, this.gutterWidth, this.getHeight(), Editor_Gutter);
         for (var i = 0; i < noOfScreenRows; i++) {
             var lnt = String(i + 1 + this.scrollY);
-            this.drawText(0, i * this.cellHeight, lnt, "#fff");
+            this.drawText(0, i * this.cellHeight, lnt, Editor_Gutter_Text);
         }
     }
     render() {
         var _a, _b, _c;
         if (this.edoc) {
             this.computePos();
-            this.fillRect(0, 0, this.getWidth(), 700, "black");
+            this.fillRect(0, 0, this.getWidth(), 700, Editor_BG);
+            var X = this.edoc.lno - this.scrollY;
+            this.fillRect(0, X * this.cellHeight, this.getWidth(), this.cellHeight, Editor_Current_Line_BG);
             this.renderGutter();
             (_a = this.g2) === null || _a === void 0 ? void 0 : _a.save();
             (_b = this.g2) === null || _b === void 0 ? void 0 : _b.translate(this.gutterWidth, 0);
@@ -161,7 +175,7 @@ export class TextRender {
             var dy = this.edoc.lno - this.scrollY;
             var x = this.edoc.col * this.cellWidth;
             var y = dy * this.cellHeight;
-            this.fillRect(x, y, 3, this.cellHeight, "white");
+            this.fillRect(x, y, 3, this.cellHeight, Editor_Text);
         }
     }
 }

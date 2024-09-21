@@ -28,6 +28,7 @@ document.addEventListener("keydown", function (e) {
     }
     else if (e.key == "Delete") {
         if (doc.selectionOn) {
+            console.log("delete selection");
             doc.deleteSelection();
         }
         else {

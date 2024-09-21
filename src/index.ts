@@ -1,10 +1,14 @@
 import { TextRender } from "./render.js";
 import { EditDoc } from "./editor.js";
 
-var render = new TextRender(document.getElementById("canvas") as HTMLCanvasElement,800,400);
+var render = new TextRender(
+  document.getElementById("canvas") as HTMLCanvasElement,
+  800,
+  400
+);
 var doc = new EditDoc();
 
-console.log(render,doc);
+console.log(render, doc);
 document.addEventListener("keydown", function (e) {
   var shiftOn = e.shiftKey;
   var ctrlOn = e.ctrlKey;
@@ -24,6 +28,7 @@ document.addEventListener("keydown", function (e) {
     doc.moveUp(shiftOn);
   } else if (e.key == "Delete") {
     if (doc.selectionOn) {
+      console.log("delete selection");
       doc.deleteSelection();
     } else {
       doc.deleteChar();
@@ -48,6 +53,6 @@ for (var i = 0; i < 100; i++) {
 doc.pasteSelection();
 doc.lno = 0;
 doc.col = 0;
-setInterval(function(){
-    render.render();
+setInterval(function () {
+  render.render();
 }, 10);

@@ -1,14 +1,29 @@
 <html>
-  <body>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
-     <canvas id="canvas" width="800" height="500px"></canvas>
-    <script type="module" src="./index.js"></script>
-    <style>
-      #canvas{
-        border: 1px solid #eee;
-      }
-    </style>
-  </body>
+
+<body>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <div style="display: flex;">
+
+    <canvas id="canvas" width="800" height="500px"></canvas>
+    <div>
+      <div>select</div>
+      <div>Start lno : <span id="start.lno">10</span> col : <span id="start.col">23</span> </div>
+      <div>End lno : <span id="end.lno">10</span> col : <span id="end.col">23</span> </div>
+    </div>
+  </div>
+
+  <script type="module" src="./index.js"></script>
+  <style>
+    #canvas {
+      border: 1px solid #eee;
+    }
+
+    @font-face {
+      font-family: 'fira';
+      src: url('./JetBrainsMono-Regular.ttf');
+    }
+  </style>
+</body>
+
 </html>
