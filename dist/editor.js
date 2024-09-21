@@ -161,7 +161,7 @@ export class EditDoc {
             this.col++;
             return;
         }
-        this.lines[this.lno].splice(this.col + 1, 1);
+        this.lines[this.lno].splice(this.col - 1, 1);
         this.col--;
     }
     deleteChar() {

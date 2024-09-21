@@ -7,9 +7,24 @@
 
     <canvas id="canvas" width="800" height="500px"></canvas>
     <div>
-      <div>select</div>
-      <div>Start lno : <span id="start.lno">10</span> col : <span id="start.col">23</span> </div>
-      <div>End lno : <span id="end.lno">10</span> col : <span id="end.col">23</span> </div>
+      <table>
+        <tr>
+          <td>Start</td>
+          <td>lno <span id="start.lno">0</span></td>
+          <td>col <span id="start.col">0</span></td>
+        </tr>
+        <tr>
+        <tr>
+          <td>End</td>
+          <td>lno <span id="end.lno">0</span></td>
+          <td>col <span id="end.col">0</span></td>
+        </tr>
+        </tr>
+        <td>Current</td>
+        <td>lno <span id="lno">0</span></td>
+        <td>col <span id="col">0</span></td>
+        </tr>
+      </table>
     </div>
   </div>
 
@@ -17,6 +32,11 @@
   <style>
     #canvas {
       border: 1px solid #eee;
+    }
+
+    table {
+      font-family: 'fira';
+      border: 1px solid #000;
     }
 
     @font-face {

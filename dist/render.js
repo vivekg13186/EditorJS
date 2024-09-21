@@ -123,6 +123,8 @@ export class TextRender {
             this.updateEText("start.col", this.edoc.select.start.col + "");
             this.updateEText("end.lno", this.edoc.select.end.lno + "");
             this.updateEText("end.col", this.edoc.select.end.col + "");
+            this.updateEText("lno", this.edoc.lno + "");
+            this.updateEText("col", this.edoc.col + "");
         }
     }
     updateEText(id, text) {
