@@ -52,7 +52,7 @@ export class EditDoc {
         return this.lno == 0 && this.col == 0;
     }
     reachedEndOfLine() {
-        return this.col == this.lines[this.lno].length + 1;
+        return this.col == this.lines[this.lno].length;
     }
     reachedStartOfLine() {
         return this.col == 0;
@@ -158,7 +158,6 @@ export class EditDoc {
             this.col = this.lines[this.lno].length;
             this.lines[this.lno] = this.lines[this.lno].concat(oldLineText);
             this.lines.splice(oldLine, 1);
-            this.col++;
             return;
         }
         this.lines[this.lno].splice(this.col - 1, 1);
