@@ -5,6 +5,8 @@ canvas.height = 300;
 g2.font = '20px "Fira Code", monospace';
 g2.textBaseline = "top";
 var cellWidth = 12;//g2.measureText("A").width;
+
+var scrollCol=0;
 function fillRect (x, y, width, height, color) {
     g2.fillStyle = color;
     g2.fillRect(x, y, width, height);
@@ -15,6 +17,7 @@ function drawText (x, y, text, color) {
 }
 
 function highlight1 (row, startCol) { //[1,2,->2,]
+    row = row - scrollY;
     var y = row * 20;
     var x = startCol * cellWidth;
     var width = edoc.lines[row].length - startCol;
@@ -22,17 +25,20 @@ function highlight1 (row, startCol) { //[1,2,->2,]
     fillRect(x, y, width, 20, "red")
 }
 function highlight2 (row, endCol) {//->[1,2,121||]
+    row = row - scrollY;
     var y = row * 20;
     var width = endCol * cellWidth;
     var x = endCol * cellWidth;
     fillRect(0, y, width, 20, "red")
 }
 function highlight (row) {
+    row = row-scrollY;
     var y = row * 20;
     var width = edoc.lines[row].length * cellWidth;
     fillRect(0, y, width, 20, "red")
 }
 function highlightStartEnd(row,start,end){
+    row = row - scrollY;
     var y = row * 20;
     var x = start*cellWidth;
     var width = (end-start)* cellWidth;
@@ -57,14 +63,36 @@ function renderSelection () {
     }
 
 }
+
+var scrollY =0;
 function main () {
     fillRect(0, 0, 700, 700, "black");
+    var minY = scrollY+3;
+    var totalRows = (300 / 20)
+    var maxY  = scrollY+totalRows-3;
+    if(edoc.lno <minY){
+        scrollY--;
+        if(scrollY<0)scrollY=0;
+    }
+    if(edoc.lno>maxY){
+        scrollY++;
+    }
+   
+    var linesToRender = scrollY+totalRows;
+    if(linesToRender>edoc.lines.length){
+        linesToRender = edoc.lines.length;
+    }
+
     if (edoc.selectionOn) {
         renderSelection();
     }
-    for (var i = 0; i < edoc.lines.length; i++) {
+  
+    var screenX=0;
+    for (var i = scrollY; i < linesToRender; i++) {
+        
         var text = edoc.lines[i].join("");
-        drawText(0, i * 20, text, "white");
+        drawText(0, screenX * 20, text, "white");
+        screenX++;
     }
     var now = Date.now();
     if (now - cursorLastRendered > 300) {
@@ -78,14 +106,13 @@ function main () {
 }
 
 function drawCursor () {
-    //console.log(cursorX,cursorY,edoc.col,edoc.lno)
+    var dy = edoc.lno-scrollY;
     var x = edoc.col * cellWidth;
-    var y = edoc.lno * 20;
+    var y = dy * 20;
     fillRect(x, y, 3, 20, "white");
 }
 
 
-setInterval(main, 10);
 
 
 class TextEditDocument {
@@ -319,7 +346,8 @@ class TextEditDocument {
         var end = edoc.select.end;
         if (start.lno == end.lno) {
             var l = this.lines[start.lno]
-            var deletedElements = l.splice(start.col,l.length);
+            var minCol = Math.min(start.col,end.col);
+            var deletedElements = l.splice(minCol,l.length);
             this.clipboard=[deletedElements.join("")];
         } else {
             var s1 = start.lno < end.lno ? start : end;
@@ -335,8 +363,18 @@ class TextEditDocument {
             result.push(endLine);
             this.clipboard =result.map(l=>l.join("")).join("\n");
         }
+        this.lno = start.lno < end.lno ? start.lno : end.lno;
+        this.col = this.lines[this.lno].length;
     }
 
+    deleteSelection(){
+
+        this.selectionOn = false;
+         var temp = this.clipboard;
+        this.cutSelection();
+        this.clipboard= temp;
+       
+    }
     copySelection () {
         if (!this.selectionOn) return
         this.selectionOn = false;
@@ -388,7 +426,11 @@ document.addEventListener("keydown", function (e) {
     var shiftOn = e.shiftKey;
     var ctrlOn = e.ctrlKey;
     if (e.key == "Backspace") {
-        edoc.backspace();
+        if(edoc.selectionOn){
+            edoc.deleteSelection();
+        }else{
+            edoc.backspace();
+        }
     } else if (e.key == "ArrowLeft") {
         edoc.moveLeft(shiftOn);
     } else if (e.key == "ArrowRight") {
@@ -398,7 +440,11 @@ document.addEventListener("keydown", function (e) {
     } else if (e.key == "ArrowUp") {
         edoc.moveUp(shiftOn);
     } else if (e.key == "Delete") {
-        edoc.deleteChar();
+        if (edoc.selectionOn) {
+            edoc.deleteSelection();
+        } else {
+            edoc.deleteChar();
+        }
     } else if ((e.key == "x" || e.key === 'X') && ctrlOn) {
         edoc.cutSelection();
     } else if ((e.key == "v" || e.key === 'V') && ctrlOn) {
@@ -413,3 +459,11 @@ document.addEventListener("keydown", function (e) {
     }
 });
  
+edoc.clipboard="";
+for (var i = 0; i < 100; i++) {
+    edoc.clipboard += `this is line ${i}\n`;
+}
+edoc.pasteSelection();
+edoc.lno=0;
+edoc.col=0;
+setInterval(main, 10);
