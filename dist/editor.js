@@ -193,27 +193,29 @@ export class EditDoc {
         this.selectionOn = false;
         var start = this.select.start;
         var end = this.select.end;
-        if (end.col == 0) {
-            end.lno--;
-            end.lno = Math.max(end.lno, 0);
-        }
         if (start.lno == end.lno) {
             var l = this.lines[start.lno];
-            var minCol = Math.min(start.col, end.col);
-            var deletedElements = l.splice(minCol, l.length);
+            var s = Math.min(start.col, end.col);
+            var delLen = Math.abs(start.col - end.col);
+            var deletedElements = l.splice(s, delLen);
             this.clipboard = deletedElements.join("");
+            this.col = s;
+            return;
         }
         else {
             var s1 = start.lno < end.lno ? start : end;
             var s2 = start.lno < end.lno ? end : start;
             var t = this.lines[s1.lno];
             var startLine = t.splice(s1.col, t.length);
-            var endLine = this.lines[s2.lno].splice(0, s2.col);
+            var endLine = s2.col == 0 ? null : this.lines[s2.lno].splice(0, s2.col);
             var result = [startLine];
             var diff = s2.lno - s1.lno;
+            if (endLine == null)
+                diff--;
             var deletedLines = this.lines.splice(s1.lno + 1, diff);
             result = result.concat(deletedLines);
-            result.push(endLine);
+            if (endLine)
+                result.push(endLine);
             this.clipboard = result.map((l) => l.join("")).join("\n");
         }
         this.lno = start.lno < end.lno ? start.lno : end.lno;
@@ -266,7 +268,6 @@ export class EditDoc {
                     this.putChar(c);
                 }
             }
-            this.clipboard = null;
         }
     }
 }

@@ -15,9 +15,9 @@ export class TextRender {
         this.g2 = canvas.getContext("2d", { alpha: false });
         canvas.width = width;
         canvas.height = height;
-        this.cellHeight = 16;
+        this.cellHeight = 14;
         if (this.g2) {
-            this.g2.font = this.cellHeight + "px fira, monospace";
+            this.g2.font = this.cellHeight + "px code";
             this.g2.textBaseline = "top";
             this.g2.textRendering = "geometricPrecision";
             this.cellWidth = this.g2.measureText("Z").width;
